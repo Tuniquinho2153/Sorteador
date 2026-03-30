@@ -1,0 +1,616 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Date Sorteado</title>
+  <style>
+    * { box-sizing: border-box; }:root {
+  --bg-1: #fff0f6;
+  --bg-2: #ffe4ee;
+  --card: rgba(255, 255, 255, 0.92);
+  --text: #3d2230;
+  --muted: #7c5a69;
+  --primary: #e14b87;
+  --primary-dark: #bf2f69;
+  --secondary: #ffd7e6;
+  --danger: #fff0f3;
+  --danger-text: #a93a59;
+  --border: rgba(225, 75, 135, 0.16);
+  --shadow: 0 18px 45px rgba(156, 39, 95, 0.14);
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.9), transparent 35%),
+    radial-gradient(circle at top right, rgba(255,255,255,0.55), transparent 25%),
+    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+  color: var(--text);
+  overflow-x: hidden;
+  position: relative;
+}
+
+.floating-hearts {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.heart {
+  position: absolute;
+  bottom: -40px;
+  font-size: 18px;
+  opacity: 0.22;
+  animation: floatHeart linear infinite;
+  filter: blur(0.2px);
+}
+
+.heart:nth-child(1) { left: 8%; animation-duration: 11s; }
+.heart:nth-child(2) { left: 20%; animation-duration: 14s; font-size: 14px; }
+.heart:nth-child(3) { left: 34%; animation-duration: 12s; }
+.heart:nth-child(4) { left: 49%; animation-duration: 16s; font-size: 15px; }
+.heart:nth-child(5) { left: 62%; animation-duration: 13s; }
+.heart:nth-child(6) { left: 75%; animation-duration: 15s; font-size: 13px; }
+.heart:nth-child(7) { left: 88%; animation-duration: 12.5s; }
+
+@keyframes floatHeart {
+  0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.22; }
+  50% { transform: translateY(-45vh) translateX(10px) rotate(8deg); }
+  100% { transform: translateY(-110vh) translateX(-10px) rotate(-10deg); opacity: 0; }
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 18px 14px 28px;
+}
+
+.phone-frame {
+  border-radius: 36px;
+  padding: 14px;
+  background: rgba(255,255,255,0.34);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 60px rgba(140, 39, 85, 0.18);
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+.screen {
+  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,246,250,0.96));
+  border-radius: 30px;
+  padding: 18px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.title-card,
+.panel,
+.result-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+}
+
+.title-card {
+  padding: 24px 18px;
+  text-align: center;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.title-card::before {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 129, 173, 0.14);
+  top: -35px;
+  right: -30px;
+}
+
+.title-card h1 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+}
+
+.title-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 0.97rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff4f8;
+  color: var(--primary-dark);
+  font-weight: bold;
+  border-radius: 999px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(225, 75, 135, 0.15);
+}
+
+.panel {
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 1.08rem;
+}
+
+.owner-tag {
+  background: #fff2f7;
+  color: var(--primary-dark);
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+input {
+  width: 100%;
+  border: 1px solid rgba(225, 75, 135, 0.15);
+  background: rgba(255,255,255,0.92);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 14px 15px;
+  outline: none;
+  font-size: 0.97rem;
+  transition: 0.2s ease;
+}
+
+input:focus {
+  border-color: rgba(225, 75, 135, 0.45);
+  box-shadow: 0 0 0 4px rgba(225, 75, 135, 0.12);
+  transform: translateY(-1px);
+}
+
+button {
+  border: none;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+button:hover { transform: translateY(-1px); }
+button:active { transform: scale(0.98); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  box-shadow: 0 14px 24px rgba(191, 47, 105, 0.22);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  color: #8a2f58;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--danger-text);
+}
+
+.mini-btn {
+  padding: 9px 11px;
+  font-size: 0.82rem;
+  border-radius: 12px;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: linear-gradient(180deg, #fffafd 0%, #fff5f8 100%);
+  border: 1px solid rgba(225, 75, 135, 0.12);
+  border-radius: 16px;
+  animation: fadeUp 0.28s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.restaurant-name {
+  font-weight: bold;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.empty {
+  opacity: 0.68;
+  font-style: italic;
+  justify-content: center;
+  text-align: center;
+}
+
+.result-card {
+  padding: 20px 16px 18px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-card::after {
+  content: "❤";
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  font-size: 1.1rem;
+  opacity: 0.18;
+}
+
+.result-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-weight: bold;
+  letter-spacing: 0.2px;
+}
+
+.result-name {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.7rem;
+  line-height: 1.2;
+  font-weight: bold;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+  padding: 0 8px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.result-owner {
+  min-height: 24px;
+  font-size: 0.98rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.roulette {
+  animation: roulette 0.18s linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes roulette {
+  0% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-1px) scale(1.02); }
+  50% { transform: translateY(1px) scale(0.99); }
+  75% { transform: translateY(-1px) scale(1.01); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.winner-pop {
+  animation: winnerPop 0.55s ease;
+}
+
+@keyframes winnerPop {
+  0% { transform: scale(0.82); opacity: 0.3; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.footer-note {
+  margin-top: 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.bottom-space {
+  height: 8px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="floating-hearts" aria-hidden="true">
+    <span class="heart">❤</span>
+    <span class="heart">❤</span>
+    <span class="heart">❤</span>
+    <span class="heart">❤</span>
+    <span class="heart">❤</span>
+    <span class="heart">❤</span>
+    <span class="heart">❤</span>
+  </div>  <div class="app-shell">
+    <div class="phone-frame">
+      <div class="screen">
+        <div class="topbar">
+          <span>💞 Date de hoje</span>
+          <span>📍 Escolhido pelo destino</span>
+        </div><div class="title-card">
+      <div class="badge">✨ Date Sorteado</div>
+      <h1>Qual vai ser o date?</h1>
+      <p>Vocês colocam os restaurantes, o app faz o sorteio e a sorte decide o próximo lugar especial.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Seus lugares</h2>
+        <span class="owner-tag">Anthony</span>
+      </div>
+      <div class="input-wrap">
+        <input type="text" id="inputAnthony" placeholder="Ex.: hamburgueria, sushi, pizzaria..." />
+        <button class="btn-primary" onclick="addRestaurant('Anthony')">Adicionar restaurante</button>
+      </div>
+      <ul id="listAnthony"></ul>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Lugares dela</h2>
+        <span class="owner-tag">Bianka</span>
+      </div>
+      <div class="input-wrap">
+        <input type="text" id="inputBianka" placeholder="Ex.: café, comida italiana, jantar..." />
+        <button class="btn-primary" onclick="addRestaurant('Bianka')">Adicionar restaurante</button>
+      </div>
+      <ul id="listBianka"></ul>
+    </div>
+
+    <div class="result-card">
+      <div class="result-label">Resultado do sorteio</div>
+      <div id="resultName" class="result-name">Nenhum restaurante sorteado ainda</div>
+      <div id="resultOwner" class="result-owner">Adicionem opções para começar</div>
+      <div class="actions">
+        <button id="drawBtn" class="btn-primary" onclick="drawRestaurant()">🎲 Sortear restaurante</button>
+        <button class="btn-secondary" onclick="clearResult()">Limpar resultado</button>
+        <button class="btn-danger" onclick="clearAll()">Apagar tudo</button>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Tudo fica salvo no navegador do aparelho. Simples, rápido e pronto para usar no celular.
+    </div>
+    <div class="bottom-space"></div>
+  </div>
+</div>
+
+  </div>  <script>
+    const STORAGE_KEY = 'dateSorteadoRestaurants';
+
+    let data = {
+      Anthony: [],
+      Bianka: [],
+      result: null
+    };
+
+    function normalizeText(text) {
+      return text.trim().replace(/\s+/g, ' ');
+    }
+
+    function loadData() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          data.Anthony = Array.isArray(parsed.Anthony) ? parsed.Anthony : [];
+          data.Bianka = Array.isArray(parsed.Bianka) ? parsed.Bianka : [];
+          data.result = parsed.result || null;
+        } catch (error) {
+          console.error('Erro ao carregar dados:', error);
+        }
+      }
+      renderAll();
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function addRestaurant(person) {
+      const input = document.getElementById(person === 'Anthony' ? 'inputAnthony' : 'inputBianka');
+      const name = normalizeText(input.value);
+
+      if (!name) {
+        alert('Digite o nome de um restaurante.');
+        return;
+      }
+
+      const allRestaurants = [...data.Anthony, ...data.Bianka].map(item => item.name.toLowerCase());
+      if (allRestaurants.includes(name.toLowerCase())) {
+        alert('Esse restaurante já foi adicionado.');
+        return;
+      }
+
+      data[person].push({
+        id: Date.now().toString() + Math.random().toString(16).slice(2),
+        name,
+        owner: person
+      });
+
+      input.value = '';
+      saveData();
+      renderAll();
+    }
+
+    function removeRestaurant(person, id) {
+      data[person] = data[person].filter(item => item.id !== id);
+      saveData();
+      renderAll();
+    }
+
+    function renderList(person) {
+      const list = document.getElementById(person === 'Anthony' ? 'listAnthony' : 'listBianka');
+      const items = data[person];
+
+      if (!items.length) {
+        list.innerHTML = '<li class="empty">Nenhum restaurante adicionado ainda.</li>';
+        return;
+      }
+
+      list.innerHTML = items.map(item => `
+        <li>
+          <span class="restaurant-name">${escapeHtml(item.name)}</span>
+          <button class="btn-danger mini-btn" onclick="removeRestaurant('${person}', '${item.id}')">Remover</button>
+        </li>
+      `).join('');
+    }
+
+    function renderResult() {
+      const resultName = document.getElementById('resultName');
+      const resultOwner = document.getElementById('resultOwner');
+
+      resultName.classList.remove('winner-pop');
+      void resultName.offsetWidth;
+
+      if (!data.result) {
+        resultName.textContent = 'Nenhum restaurante sorteado ainda';
+        resultOwner.textContent = 'Adicionem opções para começar';
+        return;
+      }
+
+      resultName.textContent = data.result.name;
+      resultOwner.textContent = `Adicionado por: ${data.result.owner}`;
+      resultName.classList.add('winner-pop');
+    }
+
+    function renderAll() {
+      renderList('Anthony');
+      renderList('Bianka');
+      renderResult();
+    }
+
+    function drawRestaurant() {
+      const allRestaurants = [...data.Anthony, ...data.Bianka];
+      const resultName = document.getElementById('resultName');
+      const resultOwner = document.getElementById('resultOwner');
+      const drawBtn = document.getElementById('drawBtn');
+
+      if (!allRestaurants.length) {
+        alert('Adicionem pelo menos um restaurante antes de sortear.');
+        return;
+      }
+
+      drawBtn.disabled = true;
+      drawBtn.style.opacity = '0.7';
+      resultName.classList.remove('winner-pop');
+      resultName.classList.add('roulette');
+
+      let index = 0;
+      const animationList = allRestaurants.length ? allRestaurants : [{ name: 'Sorteando...' }];
+
+      const interval = setInterval(() => {
+        resultName.textContent = animationList[index % animationList.length].name;
+        resultOwner.textContent = 'A sorte está escolhendo o date perfeito...';
+        index++;
+      }, 120);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        const randomIndex = Math.floor(Math.random() * allRestaurants.length);
+        data.result = allRestaurants[randomIndex];
+        resultName.classList.remove('roulette');
+        saveData();
+        renderResult();
+        drawBtn.disabled = false;
+        drawBtn.style.opacity = '1';
+      }, 2200);
+    }
+
+    function clearResult() {
+      data.result = null;
+      saveData();
+      renderResult();
+    }
+
+    function clearAll() {
+      const confirmed = confirm('Tem certeza que deseja apagar todos os restaurantes?');
+      if (!confirmed) return;
+
+      data = {
+        Anthony: [],
+        Bianka: [],
+        result: null
+      };
+
+      saveData();
+      renderAll();
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    document.getElementById('inputAnthony').addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') addRestaurant('Anthony');
+    });
+
+    document.getElementById('inputBianka').addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') addRestaurant('Bianka');
+    });
+
+    loadData();
+  </script></body>
+</html>
